@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useParams } from 'react-router';
+import { useHistory, useParams } from 'react-router';
 import { Link } from 'react-router-dom';
 import { OBSERVATION_INTERPRETATION } from '../loadPatientTestData/helpers';
 import styles from './timeline.scss';
@@ -95,15 +95,25 @@ const TimeSlots = ({ children = undefined, style }) => (
   </TimeSlotsInner>
 );
 
-const GridItems = React.memo(({ sortedTimes, obs }) => (
+
+
+const GridItems = React.memo(({ sortedTimes, obs, patientUuid, panelUuid }) => {
+  const history = useHistory();
+  return (
   <>
     {sortedTimes.map((_, i) => {
       if (!obs[i]) return <TimelineCell text={'--'} />;
       const interpretation: OBSERVATION_INTERPRETATION = obs[i].meta.assessValue(obs[i].value);
-      return <TimelineCell text={obs[i].value} interpretation={interpretation} />;
+      const testUuid = obs[i].conceptClass;
+      return <div onClick={() => history.push(`/lab-results/${patientUuid}/trendline/${panelUuid}/${testUuid}`)} style={{
+        width : '100%',
+        height: '100%',
+        }}>
+        <TimelineCell text={obs[i].value} interpretation={interpretation} />
+      </div>;
     })}
-  </>
-));
+  </>);
+});
 
 const Table = () => {
   let { patientUuid, panelUuid } = useParams<{ patientUuid: string; panelUuid: string }>();
@@ -175,10 +185,11 @@ const Table = () => {
           const {
             meta: { unit = '', range = '' },
           } = obs.find(x => !!x);
+          // console.log("timeline data", obs);
           return (
             <>
               <RowStartCell {...{ unit, range, title, shadow: xIsScrolled }} />
-              <GridItems {...{ sortedTimes, obs }} />
+              <GridItems {...{ sortedTimes, obs, patientUuid, panelUuid}} />
             </>
           );
         })}

@@ -24,14 +24,18 @@ const useTrendlineData = () => {
     panelUuid: string | undefined;
     testUuid: string;
   }>();
+  console.log("url", patientUuid, panelUuid, testUuid)
+
   const { sortedObs, loaded, error } = usePatientResultsData(patientUuid);
 
+  console.log(loaded, error)
   if (loaded && !error) {
     if (panelUuid) {
-      // return Object.entries(sortedObs[panelUuid]).find(([panelName, { entries, type, uuid }]) => {
-      // return uuid == testUuid;
-      // });
-      return null;
+      console.log("data", sortedObs)
+      console.log(sortedObs[panelUuid])
+      return Object.entries(sortedObs[panelUuid]).find(([panelName, { entries, type, uuid }]) => {
+        return uuid == testUuid;
+      });
     }
 
     return Object.entries(sortedObs).find(([panelName, { entries, type, uuid }]) => {
